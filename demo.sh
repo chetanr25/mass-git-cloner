@@ -1,0 +1,25 @@
+#!/bin/bash
+
+echo "🎨 Mass Git Cloner - Bubbletea UI Demo"
+echo "======================================"
+echo ""
+echo "✨ New Features:"
+echo "   🎨 Beautiful terminal UI with colors and styling"
+echo "   ⌨️  Keyboard navigation (arrow keys, vim keys)"
+echo "   📊 Visual progress bars and statistics"
+echo "   🔍 Interactive repository selection"
+echo "   ✅ Confirmation dialogs (default: No)"
+echo "   🎯 Smooth animations and transitions"
+echo "   🔒 Secure HTTPS cloning"
+echo ""
+echo "🎮 Controls:"
+echo "   ↑/k: Move up    ↓/j: Move down"
+echo "   Space: Toggle selection"
+echo "   Enter: Confirm"
+echo "   a: Select all   n: Select none"
+echo "   q: Quit"
+echo ""
+echo "🚀 Starting the application..."
+echo ""
+
+./bin/git-clone
