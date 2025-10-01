@@ -15,6 +15,7 @@ A powerful command-line tool that allows you to clone multiple Git repositories 
 - Batch download from GitHub users, organizations, or custom lists 
 - Simple CLI interface 
 
+<!--
 ## Table of Contents
 
 - [Installation](#-installation)
@@ -22,7 +23,7 @@ A powerful command-line tool that allows you to clone multiple Git repositories 
 - [Contributing](#-contributing)
 - [License](#-license)
 
-
+-=>
 
 ## Installation
 
