@@ -42,7 +42,15 @@ fi
 # Function to install via Go (most reliable method)
 install_via_go() {
     echo "🔨 Installing via Go..."
-    go install "github.com/$REPO/cmd/git-clone@latest"
+    
+    # Check if we're in the project directory with local source
+    if [ -f "cmd/git-clone/main.go" ] && [ -f "go.mod" ]; then
+        echo "📍 Found local source code, installing from local directory..."
+        go install ./cmd/git-clone
+    else
+        echo "📍 Installing from GitHub repository..."
+        go install "github.com/$REPO/cmd/git-clone@latest"
+    fi
     
     # Get GOPATH/GOBIN
     GOBIN=$(go env GOBIN)
