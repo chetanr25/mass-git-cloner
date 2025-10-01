@@ -1,4 +1,4 @@
-# 🚀 Mass Git Cloner (gclone)
+# Mass Git Cloner (gclone)
 
 A powerful command-line tool that allows you to clone multiple Git repositories simultaneously with ease. Perfect for developers who work with multiple repositories, need to set up development environments quickly, or want to batch clone repositories from organizations or users.
 
@@ -15,7 +15,7 @@ A powerful command-line tool that allows you to clone multiple Git repositories 
 - Batch download from GitHub users, organizations, or custom lists 
 - Simple CLI interface 
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Installation](#-installation)
 - [Usage](#-usage)
@@ -24,7 +24,7 @@ A powerful command-line tool that allows you to clone multiple Git repositories 
 
 
 
-## 🛠️ Installation
+## Installation
 
 ### Quick Install (Recommended)
 
