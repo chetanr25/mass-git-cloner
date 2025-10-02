@@ -73,12 +73,12 @@ sudo mv gclone-* /usr/local/bin/gclone
 
 | Platform | Architecture | Status |
 |----------|--------------|--------|
-| 🍎 macOS | Intel (x86_64) | ✅ Supported |
-| 🍎 macOS | Apple Silicon (ARM64) | ✅ Supported |
-| 🐧 Linux | x86_64 | ✅ Supported |
-| 🐧 Linux | ARM64 | ✅ Supported |
-| 🪟 Windows | x86_64 | ✅ Supported |
-| 🪟 Windows | x86 (32-bit) | ✅ Supported |
+| macOS | Intel (x86_64) | ✅ Supported |
+| macOS | Apple Silicon (ARM64) | ✅ Supported |
+| Linux | x86_64 | ✅ Supported |
+| Linux | ARM64 | ✅ Supported |
+| Windows | x86_64 | ✅ Supported |
+| Windows | x86 (32-bit) | ✅ Supported |
 
 ### Project Structure
 
