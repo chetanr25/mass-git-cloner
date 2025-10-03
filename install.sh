@@ -57,6 +57,15 @@ else
     echo "⚠️  Go not found - will try to download pre-built binary"
 fi
 
+# Check download tools availability for Windows
+if [ "$OS" = "windows" ]; then
+    if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+        echo "❌ Neither curl nor wget found"
+        echo "💡 Please install Git for Windows which includes curl, or install wget"
+        exit 1
+    fi
+fi
+
 # Function to install via Go (most reliable method)
 install_via_go() {
     echo "🔨 Installing via Go..."
@@ -114,31 +123,72 @@ install_prebuilt() {
     
     echo "⬇️  Downloading from: $DOWNLOAD_URL"
     
-    # Create temporary directory
-    TMP_DIR=$(mktemp -d)
+    # Create temporary directory - handle Windows path issues
+    if [ "$OS" = "windows" ]; then
+        TMP_DIR="/tmp/gclone-install-$$"
+        mkdir -p "$TMP_DIR"
+    else
+        TMP_DIR=$(mktemp -d)
+    fi
     cd "$TMP_DIR"
     
-    # Download binary
-    if curl -sSL -o "$BINARY_NAME" "$DOWNLOAD_URL"; then
-        chmod +x "$BINARY_NAME"
-        
-        # Install binary
-        echo "📦 Installing to $INSTALL_DIR..."
-        if [ -w "$INSTALL_DIR" ]; then
-            mv "$BINARY_NAME" "$INSTALL_DIR/"
+    # Download binary with Windows-specific curl options
+    if [ "$OS" = "windows" ]; then
+        # Use different curl options for Windows to avoid "Failed writing body" error
+        if curl -L --fail --show-error --output "$BINARY_NAME" "$DOWNLOAD_URL" 2>/dev/null; then
+            echo "✅ Download successful"
+        elif command -v wget >/dev/null 2>&1; then
+            echo "⚠️  curl failed, trying wget..."
+            if wget -q -O "$BINARY_NAME" "$DOWNLOAD_URL"; then
+                echo "✅ Download successful with wget"
+            else
+                echo "❌ wget also failed"
+                return 1
+            fi
+        elif command -v powershell.exe >/dev/null 2>&1; then
+            echo "⚠️  curl/wget failed, trying PowerShell..."
+            if powershell.exe -Command "Invoke-WebRequest -Uri '$DOWNLOAD_URL' -OutFile '$BINARY_NAME'" 2>/dev/null; then
+                echo "✅ Download successful with PowerShell"
+            else
+                echo "❌ All download methods failed"
+                return 1
+            fi
+        else
+            echo "❌ Download failed and no alternative tools available"
+            return 1
+        fi
+    else
+        # Use standard curl options for Linux/macOS
+        if curl -sSL -o "$BINARY_NAME" "$DOWNLOAD_URL"; then
+            echo "✅ Download successful"
+        else
+            return 1
+        fi
+    fi
+    
+    chmod +x "$BINARY_NAME"
+    
+    # Install binary
+    echo "📦 Installing to $INSTALL_DIR..."
+    if [ -w "$INSTALL_DIR" ]; then
+        mv "$BINARY_NAME" "$INSTALL_DIR/"
+    else
+        if [ "$OS" = "windows" ]; then
+            # On Windows, avoid sudo which might not work in Git Bash
+            mv "$BINARY_NAME" "$INSTALL_DIR/" 2>/dev/null || {
+                echo "❌ Cannot write to $INSTALL_DIR"
+                echo "💡 Try running as administrator or choose a different directory"
+                return 1
+            }
         else
             sudo mv "$BINARY_NAME" "$INSTALL_DIR/"
         fi
-        
-        # Cleanup
-        cd - > /dev/null
-        rm -rf "$TMP_DIR"
-        return 0
-    else
-        cd - > /dev/null
-        rm -rf "$TMP_DIR"
-        return 1
     fi
+    
+    # Cleanup
+    cd - > /dev/null
+    rm -rf "$TMP_DIR"
+    return 0
 }
 
 # Try installation methods
@@ -152,6 +202,17 @@ if [ "$GO_INSTALLED" = true ]; then
         echo "✅ Successfully installed via pre-built binary!"
     else
         echo "❌ Both installation methods failed"
+        if [ "$OS" = "windows" ]; then
+            echo ""
+            echo "🪟 Windows Troubleshooting:"
+            echo "   • Ensure you're running in Git Bash, PowerShell, or WSL"
+            echo "   • Try running as Administrator"
+            echo "   • Check if antivirus is blocking the download"
+            echo "   • Manual installation:"
+            echo "     1. Download from: https://github.com/$REPO/releases"
+            echo "     2. Extract to a folder in your PATH"
+            echo ""
+        fi
         exit 1
     fi
 else
@@ -160,7 +221,18 @@ else
         echo "✅ Successfully installed via pre-built binary!"
     else
         echo "❌ Installation failed!"
-        echo "💡 Please install Go and try again:"
+        if [ "$OS" = "windows" ]; then
+            echo ""
+            echo "🪟 Windows Troubleshooting:"
+            echo "   • Ensure you're running in Git Bash, PowerShell, or WSL"
+            echo "   • Try running as Administrator"
+            echo "   • Check if antivirus is blocking the download"
+            echo "   • Manual installation:"
+            echo "     1. Download from: https://github.com/$REPO/releases"
+            echo "     2. Extract to a folder in your PATH"
+            echo ""
+        fi
+        echo "💡 Alternative: Install Go and try:"
         echo "   go install github.com/$REPO/cmd/git-clone@latest"
         exit 1
     fi
