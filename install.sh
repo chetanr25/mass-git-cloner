@@ -19,12 +19,30 @@ ARCH=$(uname -m)
 case $ARCH in
     x86_64) ARCH="amd64" ;;
     aarch64|arm64) ARCH="arm64" ;;
+    i686|i386) ARCH="386" ;;
     *) echo "❌ Unsupported architecture: $ARCH" && exit 1 ;;
 esac
 
+# Handle Windows environments (including Git Bash, MSYS2, Cygwin)
 case $OS in
     linux) PLATFORM="linux-$ARCH" ;;
     darwin) PLATFORM="darwin-$ARCH" ;;
+    mingw64*|msys*|cygwin*) 
+        OS="windows"
+        PLATFORM="windows-$ARCH" 
+        BINARY_NAME="gclone.exe"
+        # For Windows environments, try to install in a directory that's in PATH
+        if [ -d "/usr/local/bin" ]; then
+            INSTALL_DIR="/usr/local/bin"
+        elif [ -d "/usr/bin" ]; then
+            INSTALL_DIR="/usr/bin"
+        else
+            INSTALL_DIR="$HOME/bin"
+            mkdir -p "$INSTALL_DIR"
+            echo "📍 Created directory: $INSTALL_DIR"
+            echo "⚠️  Make sure $INSTALL_DIR is in your PATH"
+        fi
+        ;;
     *) echo "❌ Unsupported OS: $OS" && exit 1 ;;
 esac
 
@@ -62,15 +80,21 @@ install_via_go() {
         GOBIN="$GOPATH/bin"
     fi
     
-    echo "📍 Go installed binary to: $GOBIN/git-clone"
+    # Handle Windows executable extension
+    GO_BINARY_NAME="git-clone"
+    if [ "$OS" = "windows" ]; then
+        GO_BINARY_NAME="git-clone.exe"
+    fi
+    
+    echo "📍 Go installed binary to: $GOBIN/$GO_BINARY_NAME"
     
     # Create symlink with shorter name
-    if [ -f "$GOBIN/git-clone" ]; then
-        echo "📍 Creating symlink: $INSTALL_DIR/$BINARY_NAME -> $GOBIN/git-clone"
+    if [ -f "$GOBIN/$GO_BINARY_NAME" ]; then
+        echo "📍 Creating symlink: $INSTALL_DIR/$BINARY_NAME -> $GOBIN/$GO_BINARY_NAME"
         if [ -w "$INSTALL_DIR" ]; then
-            ln -sf "$GOBIN/git-clone" "$INSTALL_DIR/$BINARY_NAME"
+            ln -sf "$GOBIN/$GO_BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
         else
-            sudo ln -sf "$GOBIN/git-clone" "$INSTALL_DIR/$BINARY_NAME"
+            sudo ln -sf "$GOBIN/$GO_BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
         fi
         return 0
     else
@@ -145,14 +169,27 @@ fi
 echo ""
 echo "🎉 Installation complete!"
 echo ""
-echo "� You can now run:"
+echo "🛠️ You can now run:"
 echo "   $BINARY_NAME"
 echo ""
 echo "🔍 To verify installation:"
 echo "   which $BINARY_NAME"
 echo ""
+
+# Windows-specific guidance
+if [ "$OS" = "windows" ]; then
+    echo "🪟 Windows Note:"
+    echo "   If command not found, ensure $INSTALL_DIR is in your PATH"
+    echo "   You may need to restart your terminal/Git Bash"
+    echo ""
+fi
+
 echo "📚 For usage instructions, visit:"
 echo "   https://github.com/$REPO"
 echo ""
 echo "🚀 To uninstall later:"
-echo "   sudo rm $INSTALL_DIR/$BINARY_NAME"
+if [ "$OS" = "windows" ]; then
+    echo "   rm $INSTALL_DIR/$BINARY_NAME"
+else
+    echo "   sudo rm $INSTALL_DIR/$BINARY_NAME"
+fi
